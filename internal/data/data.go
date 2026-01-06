@@ -10,12 +10,12 @@ import (
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
 
-// Data .
+// Data is the data layer dependency container.
 type Data struct {
 	// TODO wrapped database client
 }
 
-// NewData .
+// NewData creates a new Data instance and returns a cleanup function.
 func NewData(c *conf.Data) (*Data, func(), error) {
 	cleanup := func() {
 		log.Info("closing the data resources")

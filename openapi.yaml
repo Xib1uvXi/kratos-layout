@@ -3,15 +3,23 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: ""
     version: 0.0.1
 paths:
+    /health:
+        get:
+            tags:
+                - Health
+            description: Check returns the health status of the service
+            operationId: Health_Check
+            responses:
+                "200":
+                    description: OK
+                    content: {}
     /helloworld/{name}:
         get:
             tags:
                 - Greeter
-                - subgroup
             description: Sends a greeting
             operationId: Greeter_SayHello
             parameters:
@@ -37,3 +45,6 @@ components:
             description: The response message containing the greetings
 tags:
     - name: Greeter
+      description: The greeting service definition.
+    - name: Health
+      description: Health service for liveness check

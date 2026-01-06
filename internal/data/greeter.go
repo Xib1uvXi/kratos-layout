@@ -13,7 +13,7 @@ type greeterRepo struct {
 	log  *log.Helper
 }
 
-// NewGreeterRepo .
+// NewGreeterRepo creates a new GreeterRepo.
 func NewGreeterRepo(data *Data, logger log.Logger) biz.GreeterRepo {
 	return &greeterRepo{
 		data: data,

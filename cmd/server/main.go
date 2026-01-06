@@ -25,11 +25,16 @@ var (
 	Version string
 	// flagconf is the config flag.
 	flagconf string
-
-	id, _ = os.Hostname()
+	// id is the service instance id.
+	id string
 )
 
 func init() {
+	var err error
+	id, err = os.Hostname()
+	if err != nil {
+		id = "unknown"
+	}
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 

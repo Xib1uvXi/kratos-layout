@@ -36,3 +36,12 @@ bin/
 .vscode/
 .idea/
 *.swp
+tmp/
+
+# ai
+CLAUDE.md
+AGENTS.md
+.claude/
+
+# local config
+configs/.local.*

@@ -2,18 +2,9 @@ GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 
-ifeq ($(GOHOSTOS), windows)
-	#the `find.exe` is different from `find` in bash/shell.
-	#to see https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/find.
-	#changed to use git-bash.exe to run find cli or other cli friendly, caused of every developer has a Git.
-	#Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
-	Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
-	INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find internal -name *.proto")
-	API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
-else
-	INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
-	API_PROTO_FILES=$(shell find api -name *.proto)
-endif
+INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
+API_PROTO_FILES=$(shell find api -name *.proto)
+
 
 .PHONY: init
 # init env
@@ -24,6 +15,9 @@ init:
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 	go install github.com/google/wire/cmd/wire@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+	make hooks
 
 .PHONY: config
 # generate internal proto
@@ -61,6 +55,39 @@ all:
 	make api
 	make config
 	make generate
+
+.PHONY: lint
+# run linter
+lint:
+	golangci-lint run ./...
+
+.PHONY: lint-fix
+# run linter and fix
+lint-fix:
+	golangci-lint run --fix ./...
+
+.PHONY: test
+# run tests
+test:
+	go test -v -race ./...
+
+
+.PHONY: hooks
+# install git hooks
+hooks:
+	cp scripts/pre-commit.sh .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+	@echo "Git hooks installed."
+
+.PHONY: dev-up
+# start dev environment
+dev-up:
+	./scripts/dev-env.sh start
+
+.PHONY: dev-down
+# stop dev environment
+dev-down:
+	./scripts/dev-env.sh stop
 
 # show help
 help:

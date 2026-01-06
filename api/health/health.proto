@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package health;
+
+option go_package = "github.com/go-kratos/kratos-layout/api/health;health";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+// Health service for liveness check
+service Health {
+  // Check returns the health status of the service
+  rpc Check(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      get: "/health"
+    };
+  }
+}

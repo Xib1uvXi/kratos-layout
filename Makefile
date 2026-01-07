@@ -17,7 +17,6 @@ init:
 	go install github.com/google/wire/cmd/wire@latest
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 	go install golang.org/x/tools/cmd/goimports@latest
-	make hooks
 
 .PHONY: config
 # generate internal proto
@@ -56,20 +55,18 @@ all:
 	make config
 	make generate
 
-.PHONY: lint
-# run linter
-lint:
-	golangci-lint run ./...
-
-.PHONY: lint-fix
-# run linter and fix
-lint-fix:
-	golangci-lint run --fix ./...
-
 .PHONY: test
 # run tests
 test:
 	go test -v -race ./...
+
+.PHONY: check
+# format code, run tests and lint
+check:
+	goimports -w .
+	gofmt -w .
+	go test -race ./...
+	golangci-lint run ./...
 
 
 .PHONY: hooks

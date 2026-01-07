@@ -7,9 +7,18 @@ server:
     timeout: 1s
 data:
   database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
+    username: root
+    password: root
+    host: mysql
+    port: 3306
+    db_name: kratos_layout_dev
+    max_idle_conns: 10
+    max_open_conns: 100
+    db_charset: utf8mb4
+    conn_max_lifetime: 3600s
+    conn_max_idle_time: 3600s
   redis:
     addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    dial_timeout: 1s
+    read_timeout: 1s
+    write_timeout: 1s

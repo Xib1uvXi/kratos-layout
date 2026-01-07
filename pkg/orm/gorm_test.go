@@ -8,10 +8,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var password = "root"
+
 func TestMakeDBUtil(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -34,7 +36,7 @@ func TestMakeDBUtil(t *testing.T) {
 func TestMakeDB(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -175,7 +177,7 @@ func TestDBConfig_getConnMaxIdleTime(t *testing.T) {
 func TestGormMysql_GetUtilDB(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -197,7 +199,7 @@ func TestGormMysql_GetUtilDB(t *testing.T) {
 func TestGormMysql_GetDB(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -230,7 +232,7 @@ func TestGormMysql_GetDB(t *testing.T) {
 func TestGormMysql_CreateDB_Error(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -250,7 +252,7 @@ func TestGormMysql_CreateDB_Error(t *testing.T) {
 func TestGormMysql_DropDB_Error(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -270,7 +272,7 @@ func TestGormMysql_DropDB_Error(t *testing.T) {
 func TestGormMysql_ClearAllData_Error(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "production_db",
@@ -303,7 +305,7 @@ func TestGormMysql_ClearAllData_Error(t *testing.T) {
 func TestGormMysql_ClearAllData_DBNil(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",
@@ -323,7 +325,7 @@ func TestGormMysql_ClearAllData_DBNil(t *testing.T) {
 func TestGormMysql_Close(t *testing.T) {
 	dbConf := &DBConfig{
 		Username:     "root",
-		Password:     "root",
+		Password:     password,
 		Host:         "127.0.0.1",
 		Port:         "3306",
 		DBName:       "hahaha_test",

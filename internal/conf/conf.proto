@@ -47,6 +47,9 @@ message Data {
     google.protobuf.Duration read_timeout = 6;
     google.protobuf.Duration write_timeout = 7;
   }
+
   Database database = 1;
   Redis redis = 2;
 }
+
+message Application { string name = 1; }

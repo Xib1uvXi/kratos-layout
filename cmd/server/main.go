@@ -1,20 +1,25 @@
 package main
 
 import (
-	"flag"
 	"os"
 
-	"github.com/go-kratos/kratos-layout/internal/conf"
-
+	"github.com/go-kratos/kratos/contrib/config/apollo/v2"
+	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
+	"github.com/go-kratos/kratos/v2/encoding/json"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
-
 	_ "go.uber.org/automaxprocs"
+	"go.uber.org/zap/zapcore"
+	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/go-kratos/kratos-layout/internal/conf"
+	"github.com/go-kratos/kratos-layout/pkg/env"
+	"github.com/go-kratos/kratos-layout/pkg/registry"
+
+	zaplog "github.com/go-kratos/kratos-layout/pkg/log"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -23,22 +28,32 @@ var (
 	Name string
 	// Version is the version of the compiled software.
 	Version string
-	// flagconf is the config flag.
-	flagconf string
 	// id is the service instance id.
 	id string
 )
 
 func init() {
+	json.MarshalOptions = protojson.MarshalOptions{
+		EmitUnpopulated: true,
+		UseProtoNames:   true,
+	}
+
 	var err error
 	id, err = os.Hostname()
 	if err != nil {
 		id = "unknown"
 	}
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+
+	if Name == "" {
+		Name = env.GetOrDefault("SERVICE_NAME", "kratos_layout")
+	}
+
+	if Version == "" {
+		Version = env.GetOrDefault("SERVICE_VERSION", "0.0.1")
+	}
 }
 
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
+func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, r *nacos.Registry) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -49,23 +64,22 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 			gs,
 			hs,
 		),
+		kratos.Registrar(r),
 	)
 }
 
 func main() {
-	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"ts", log.DefaultTimestamp,
-		"caller", log.DefaultCaller,
-		"service.id", id,
-		"service.name", Name,
-		"service.version", Version,
-		"trace.id", tracing.TraceID(),
-		"span.id", tracing.SpanID(),
-	)
+	logger := zaplog.InitDefaultLogger(zapcore.DebugLevel)
+
 	c := config.New(
 		config.WithSource(
-			file.NewSource(flagconf),
+			apollo.NewSource(
+				apollo.WithAppID(env.GetOrDefault("APOLLO_APP_ID", "kratos_layout")),
+				apollo.WithCluster(env.GetOrDefault("APOLLO_CLUSTER", "dev")),
+				apollo.WithEndpoint(env.GetOrDefault("APOLLO_ENDPOINT", "http://localhost:8080")),
+				apollo.WithNamespace(env.GetOrDefault("APOLLO_NAMESPACE", "application,bootstrap.yaml")),
+				apollo.WithSecret(env.GetOrDefault("APOLLO_SECRET", "fc4cacadc4cb486b91419d67f6d7918b")),
+			),
 		),
 	)
 	defer c.Close()
@@ -75,11 +89,16 @@ func main() {
 	}
 
 	var bc conf.Bootstrap
-	if err := c.Scan(&bc); err != nil {
+	if err := c.Value("bootstrap").Scan(&bc); err != nil {
 		panic(err)
 	}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	r, err := registry.NewNacosRegistryFromEnv()
+	if err != nil {
+		panic(err)
+	}
+
+	app, cleanup, err := wireApp(bc.Server, bc.Data, r, logger)
 	if err != nil {
 		panic(err)
 	}
